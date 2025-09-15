@@ -8,7 +8,10 @@
   (printf "Vecinos de casilla ~a: ~a" columnas (vecinos columnas filas columnas '() 8))
   )
 
-
+#|
+Contador inicia en 8 siempre, ya que se alrededor de cada casilla pueden haber hasta 8 vecinos
+Los calcula de manera horaria, iniciando por el superior izquierdo
+|#
 (define (vecinos casilla filas columnas lista contador)
   (cond ((zero? contador) lista)
         ;; superior izquierdo
@@ -46,7 +49,8 @@
 )
 
 
-#|(vecinos 1 4 4 '() 8)
+#| Pruebas para cuadricula 4x4
+(vecinos 1 4 4 '() 8)
 (vecinos 2 4 4 '() 8)
 (vecinos 3 4 4 '() 8)
 (vecinos 4 4 4 '() 8)
