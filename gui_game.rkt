@@ -1,5 +1,14 @@
 #lang racket/gui
 
+;;(require "gui.rkt")
+(require "logic.rkt")
+
+
+
+#|(define parametros (parametros-matriz))
+(define matriz (crear-matriz ))
+
+(print parametros)|#
 ;; ==================== ESTRUCTURA DEL GRAFO-MATRIZ ====================
 (struct grafo-matriz (filas columnas nodos vecinos) #:mutable)
 
