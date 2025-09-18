@@ -1,6 +1,7 @@
 #lang racket
 
 (provide crear-matriz)
+;;(require "gui.rkt")
 
 #|(define (d r t)
   (define y (+ r t)))
@@ -12,6 +13,9 @@
 Contador inicia en 8 siempre, ya que se alrededor de cada casilla pueden haber hasta 8 vecinos
 Los calcula de manera horaria, iniciando por el superior izquierdo
 |#
+;;(print obtener-filas)
+;;(print obtener-filas)
+
 (define (vecinos casilla filas columnas)
   (define (aux indice acumulado)
     (cond

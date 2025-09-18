@@ -1,6 +1,11 @@
 #lang racket/gui
-(require "gui_game.rkt") ;; Importar la función iniciar-gui-game
-(require "logic.rkt")
+
+
+(print "3333")
+#|(require "gui_game.rkt") ;; Importar la función iniciar-gui-game
+;;(require "logic.rkt")
+
+(provide obtener-filas)
 
 (define start-frame (new frame%
                          [label "Pantalla de Inicio"]
@@ -40,7 +45,8 @@
        [label ""]
        [choices '("Fácil" "Medio" "Difícil")]))
 
-
+(define obtener-filas
+  (string->number (send filas-choice get-string-selection)))
 ;; Botón de iniciar
 (new button% [parent main-panel]
              [label "Iniciar"]
@@ -51,7 +57,7 @@
                 (define dificultad (send dificultad-choice get-string-selection))
                 (send start-frame show #f) ;; oculta pantalla de inicio
                 (iniciar-gui-game filas cols dificultad)
-                (crear-matriz filas cols dificultad)
+                ;;(crear-matriz filas cols dificultad)
                 )])
 
-(send start-frame show #t)
+(send start-frame show #t)|#
