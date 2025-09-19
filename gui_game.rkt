@@ -2,7 +2,7 @@
 
 ;;(require "gui.rkt")
 (require "logic.rkt")
- ;; Importar la función iniciar-gui-game
+;; Importar la función iniciar-gui-game
 ;;(require "logic.rkt")
 
 (provide obtener-filas)
@@ -99,14 +99,25 @@
     (define actual (+ (* i m) j))
     (define vecinos-actual '())
     
+    ;; Vecinos ortogonales (arriba, abajo, izquierda, derecha)
     (when (> i 0)
-      (set! vecinos-actual (cons (+ (* (- i 1) m) j) vecinos-actual)))
+      (set! vecinos-actual (cons (+ (* (- i 1) m) j) vecinos-actual))) ; Arriba
     (when (< i (- n 1))
-      (set! vecinos-actual (cons (+ (* (+ i 1) m) j) vecinos-actual)))
+      (set! vecinos-actual (cons (+ (* (+ i 1) m) j) vecinos-actual))) ; Abajo
     (when (> j 0)
-      (set! vecinos-actual (cons (+ (* i m) (- j 1)) vecinos-actual)))
+      (set! vecinos-actual (cons (+ (* i m) (- j 1)) vecinos-actual))) ; Izquierda
     (when (< j (- m 1))
-      (set! vecinos-actual (cons (+ (* i m) (+ j 1)) vecinos-actual)))
+      (set! vecinos-actual (cons (+ (* i m) (+ j 1)) vecinos-actual))) ; Derecha
+    
+    ;; Vecinos diagonales (las cuatro diagonales)
+    (when (and (> i 0) (> j 0))
+      (set! vecinos-actual (cons (+ (* (- i 1) m) (- j 1)) vecinos-actual))) ; Arriba-izquierda
+    (when (and (> i 0) (< j (- m 1)))
+      (set! vecinos-actual (cons (+ (* (- i 1) m) (+ j 1)) vecinos-actual))) ; Arriba-derecha
+    (when (and (< i (- n 1)) (> j 0))
+      (set! vecinos-actual (cons (+ (* (+ i 1) m) (- j 1)) vecinos-actual))) ; Abajo-izquierda
+    (when (and (< i (- n 1)) (< j (- m 1)))
+      (set! vecinos-actual (cons (+ (* (+ i 1) m) (+ j 1)) vecinos-actual))) ; Abajo-derecha
     
     (hash-set! vecinos actual vecinos-actual))
   

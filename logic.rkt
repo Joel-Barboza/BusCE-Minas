@@ -1,21 +1,10 @@
 #lang racket
 
-(provide crear-matriz)
-;;(require "gui.rkt")
+(provide crear-matriz vecinos crear-casilla
+         obtener-casilla obtener-mina obtener-bandera obtener-vecinos-casilla
+         obtener-indice obtener-coordenadas)
 
-#|(define (d r t)
-  (define y (+ r t)))
-(define x (d 1 2))
-(print x)|#
-
-
-#|
-Contador inicia en 8 siempre, ya que se alrededor de cada casilla pueden haber hasta 8 vecinos
-Los calcula de manera horaria, iniciando por el superior izquierdo
-|#
-;;(print obtener-filas)
-;;(print obtener-filas)
-
+;; ==================== FUNCIONES DE MATRIZ ====================
 (define (vecinos casilla filas columnas)
   (define (aux indice acumulado)
     (cond
@@ -69,15 +58,17 @@ Los calcula de manera horaria, iniciando por el superior izquierdo
       (else (aux (- indice 1) acumulado))))
   (aux 8 '())) ; inicializa índice en 1
 
+;; crea el elemento de la matriz que representa una casilla
+(define (crear-casilla mina bandera casilla filas columnas)
+  (list mina bandera (vecinos casilla filas columnas)))
 
 (define (crear-matriz filas columnas dificultad)
-  ;;(define ())
   ;; función auxiliar para construir una fila
   (define (crear-fila idx restantes)
     (cond
       ((zero? restantes) '())  ;; fila completa
       (else
-       ( cons (crear-casilla 0 0 idx filas columnas)
+       (cons (crear-casilla 0 0 idx filas columnas)
              (crear-fila (+ idx 1) (- restantes 1))))))
   
   ;; función auxiliar para construir todas las filas
@@ -92,38 +83,48 @@ Los calcula de manera horaria, iniciando por el superior izquierdo
   (crear 1 filas))
 
 
-;; crea el elemento de la matriz que representa una casilla
-(define (crear-casilla mina bandera casilla filas columnas)
-  (cons mina (cons bandera (cons (vecinos casilla filas columnas) '()))))
+(define (crear-lista-bombas filas columnas dificultad )
+  (define casillas (* filas columnas))
+  (define bombas (cantidad-bombas filas columnas dificultad))
+  (define (bombas-aux idx lista-bombas)
+    (cond ((zero? idx) lista-bombas)
+          (else
+           (bombas-aux (- idx 1) (cons (+ 1 (random (* filas columnas))) lista-bombas)))))
+  (bombas-aux bombas '()))
 
-(define (poner-mina casilla)(#t))
+(define (cantidad-bombas filas columnas dificultad)
+  (cond ((equal? dificultad "Fácil")
+         (round (/ (* filas columnas) 10)))
+        ((equal? dificultad "Medio")
+         (round (/ (* filas columnas) 15)))
+        ((equal? dificultad "Difícil")
+         (round (/ (* filas columnas) 20)))
+        ))
 
-(crear-casilla 1 0 3 5 4)
+(crear-lista-bombas 8 8 "Fácil")
+(define (matriz-con-bombas matriz lista-bombas)
+  (#t))
 
-(define matriz (crear-matriz 4 4 'facil))
-(print matriz)
+;; ==================== FUNCIONES AUXILIARES ====================
+(define (obtener-casilla matriz i j)
+  (list-ref (list-ref matriz i) j))
 
+(define (obtener-mina casilla)
+  (list-ref casilla 0))
 
+(define (obtener-bandera casilla)
+  (list-ref casilla 1))
 
+(define (obtener-vecinos-casilla casilla)
+  (list-ref casilla 2))
 
+(define (obtener-indice filas columnas i j)
+  (+ (* i columnas) j 1))
 
-#| Pruebas para cuadricula 4x4
-(vecinos 1 4 4 '())
-(vecinos 2 4 4 '())
-(vecinos 3 4 4 '())
-(vecinos 4 4 4 '())
-(vecinos 5 4 4 '())
-(vecinos 6 4 4 '())
-(vecinos 7 4 4 '())
-(vecinos 8 4 4 '())
-(vecinos 9 4 4 '())
-(vecinos 10 4 4 '())
-(vecinos 11 4 4 '())
-(vecinos 12 4 4 '())
-(vecinos 13 4 4 '()
-(vecinos 14 4 4 '())
-(vecinos 15 4 4 '())
-(vecinos 16 4 4 '())|#
+(define (obtener-coordenadas idx columnas)
+  (define i (quotient (- idx 1) columnas))
+  (define j (remainder (- idx 1) columnas))
+  (list i j))
 
 
 
