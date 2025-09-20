@@ -60,9 +60,9 @@
                 (define cols (string->number (send cols-choice get-string-selection)))
                 (define dificultad (send dificultad-choice get-string-selection))
                 (send start-frame show #f) ;; oculta pantalla de inicio
-                (actualizar-matriz (crear-matriz filas cols dificultad))
+                (actualizar-matriz (crear-matriz filas cols))
                 (iniciar-gui-game filas cols dificultad)
-                ;;(crear-matriz filas cols dificultad)
+                (crear-matriz-con-bombas filas cols dificultad)
                 )])
 
 (send start-frame show #t)
@@ -136,7 +136,7 @@
 
 ;; ==================== INTERFAZ GRÁFICA ====================
 (define frame (new frame%
-                   [label "Matriz 10x10 - Selector de Celdas"]
+                   [label (format "Matriz ~ax~a - Selector de Celdas" obtener-filas obtener-columnas)]
                    [width 800]
                    [height 650]))
 
@@ -150,7 +150,7 @@
 ;; Panel para la matriz
 (define panel-matriz-container (new group-box-panel%
                                    [parent panel-principal]
-                                   [label "Matriz 10x10"]
+                                   [label (format "Matriz ~ax~a" obtener-filas obtener-columnas)]
                                    [min-width 500]
                                    [min-height 400]))
 
