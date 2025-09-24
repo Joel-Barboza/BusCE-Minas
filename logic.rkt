@@ -2,13 +2,14 @@
 
 (provide crear-matriz vecinos crear-casilla
          obtener-casilla obtener-mina obtener-bandera obtener-vecinos-casilla
-         obtener-indice obtener-coordenadas crear-matriz-con-bombas)
+         obtener-indice obtener-coordenadas crear-matriz-con-bombas
+         crear-lista-bombas)  ;; Nueva función exportada
 
 ;; ==================== FUNCIONES DE MATRIZ ====================
 (define (vecinos casilla filas columnas)
   (define (aux indice acumulado)
     (cond
-      ((<= indice 0) acumulado) ; se revisaron las 8 posiciones posibles
+      ((<= indice 0) acumulado)
 
       ;; 1: superior izquierdo
       ((and (= indice 1)
@@ -54,42 +55,39 @@
             (<= (+ casilla columnas 1) (* filas columnas)))
        (aux (- indice 1) (cons (+ casilla columnas 1) acumulado)))
 
-      ;; si no se cumple la condición del índice actual → seguir al siguiente
       (else (aux (- indice 1) acumulado))))
-  (aux 8 '())) ; inicializa índice en 1
+  (aux 8 '()))
 
-;; crea el elemento de la matriz que representa una casilla
 (define (crear-casilla mina bandera casilla filas columnas)
   (list mina bandera (vecinos casilla filas columnas)))
 
 (define (crear-matriz filas columnas)
-  ;; función auxiliar para construir una fila
   (define (crear-fila idx restantes)
     (cond
-      ((zero? restantes) '())  ;; fila completa
+      ((zero? restantes) '())
       (else
        (cons (crear-casilla 0 0 idx filas columnas)
              (crear-fila (+ idx 1) (- restantes 1))))))
   
-  ;; función auxiliar para construir todas las filas
   (define (crear idx fila-restantes)
     (cond
-      ((zero? fila-restantes) '())  ;; todas las filas listas
+      ((zero? fila-restantes) '())
       (else
        (cons (crear-fila idx columnas)
              (crear (+ idx columnas) (- fila-restantes 1))))))
   
-  ;; arrancamos desde el índice 1 y con todas las filas
   (crear 1 filas))
 
-
-(define (crear-lista-bombas filas columnas dificultad )
+(define (crear-lista-bombas filas columnas dificultad)
   (define casillas (* filas columnas))
   (define bombas (cantidad-bombas filas columnas dificultad))
   (define (bombas-aux idx lista-bombas)
     (cond ((zero? idx) lista-bombas)
           (else
-           (bombas-aux (- idx 1) (cons (+ 1 (random (* filas columnas))) lista-bombas)))))
+           (define nueva-bomba (+ 1 (random (* filas columnas))))  ;; Asegurar que empieza desde 1
+           (if (member nueva-bomba lista-bombas)
+               (bombas-aux idx lista-bombas)  ;; Si ya existe, intentar de nuevo
+               (bombas-aux (- idx 1) (cons nueva-bomba lista-bombas))))))
   (bombas-aux bombas '()))
 
 (define (cantidad-bombas filas columnas dificultad)
@@ -98,9 +96,7 @@
         ((equal? dificultad "Medio")
          (round (/ (* filas columnas) 15)))
         ((equal? dificultad "Difícil")
-         (round (/ (* filas columnas) 20)))
-        ))
-
+         (round (/ (* filas columnas) 20)))))
 
 ;; ==================== FUNCIONES AUXILIARES ====================
 (define (obtener-casilla matriz i j)
@@ -123,43 +119,14 @@
   (define j (remainder (- idx 1) columnas))
   (list i j))
 
-
-
-
-
-
-#|(define (actualizar-casilla elem)
-  (cons 1 (cdr elem)))
-
-(define (reemplazar-en-fila matriz idx elem columnas)
-  (define coords (obtener-coordenadas idx columnas))
-  (define (fila-aux i matriz resultado )
-    (cond ((equal? i (car coords))
-           (columna-aux 0 (car matriz) '() (reverse resultado) (cdr matriz)))
-          (else
-           (fila-aux (+ i 1) (cdr matriz) (cons (car matriz) (reverse resultado))))))
-  (define (columna-aux j fila result-fila anterior posterior)
-    (cond ((equal? j (cadr coords))
-           ;;(reverse result-fila))
-           (append anterior
-                   (list (append result-fila (list (actualizar-casilla (car fila))) (cdr fila)))
-                   posterior))
-           ;;(#t))
-          (else
-           (columna-aux (+ j 1) (cdr fila) (cons (car fila) (reverse result-fila)) anterior posterior))))
-  (fila-aux 0 matriz '()))|#
-;;(print (reemplazar-en-fila 10 '() 4))
-
 (define (actualizar-casilla elem)
   (cons 1 (cdr elem)))
 
-;; reemplaza una casilla en la fila j
 (define (reemplazar-en-fila fila j)
   (cond
     [(zero? j) (cons (actualizar-casilla (car fila)) (cdr fila))]
     [else (cons (car fila) (reemplazar-en-fila (cdr fila) (sub1 j)))]))
 
-;; reemplaza una casilla en la matriz (fila i, col j)
 (define (reemplazar-en-matriz matriz i j)
   (cond
     [(zero? i) (cons (reemplazar-en-fila (car matriz) j) (cdr matriz))]
@@ -180,37 +147,9 @@
       (cdr lista-bombas)
       columnas)]))
 
-
-;;(define A (crear-matriz 4 4))
-;;(print A)
-;;(define v (crear-lista-bombas 4 4 "Fácil"))
-;;(print v)
-
-#|(define (matriz-con-bombas matriz lista-bombas columnas)
-  (define (colocar-bomba mat lista)
-    (cond ((null? lista)
-           mat)
-          (else
-           (colocar-bomba (reemplazar-en-fila matriz (car lista) '() columnas) (cdr lista) ))))
-  (colocar-bomba matriz lista-bombas))|#
-
-;;(matriz-con-bombas A v 4)
-
-#|(define (crear-matriz-con-bombas columnas filas dificultad)
-  (define A (crear-matriz filas columnas))
-  (define v (crear-lista-bombas filas columnas "Fácil"))
-  (define Av (matriz-con-bombas A v columnas))
-  (print Av)
-  Av)|#
-
-
 (define (crear-matriz-con-bombas filas columnas dificultad)
   (define A (crear-matriz filas columnas))
   (define v (crear-lista-bombas filas columnas dificultad))
   (define Av (matriz-con-bombas A v columnas))
-  (print Av) ; opcional, solo para debug
+  (print Av)
   Av)
-
-
-
-
