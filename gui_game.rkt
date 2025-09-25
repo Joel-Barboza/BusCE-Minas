@@ -218,6 +218,7 @@
 (define (manejar-click-celda i j)
   (when juego-activo
     (define idx (obtener-indice mi-grafo i j))
+    ;; No es necesario si se deja el indice en cero lo calcula bien
     (define indice-real (+ idx 1))  ;; Convertir a índice que empieza desde 1
     (define tiene-bomba (member indice-real lista-bombas))
     
@@ -262,14 +263,14 @@
     (define j-real (+ j 1))
     
     ;; Limpiar selección anterior
-    (when boton-seleccionado
+   #| (when boton-seleccionado
       (send boton-seleccionado set-label " ")  ;; Cambio: volver a dejar vacío
-      (send boton-seleccionado enable #t))
+      (send boton-seleccionado enable #t))|#
     
     ;; Marcar nueva selección
     (set! celda-seleccionada (cons i-real j-real))
     (set! boton-seleccionado (vector-ref (vector-ref botones-matriz i) j))
-    (send boton-seleccionado set-label "X")  ;; Cambio: mostrar "X" solo cuando está seleccionado
+    (send boton-seleccionado set-label (number->string (bombas-vecinas idx vecinos lista-bombas)))  ;; Cambio: mostrar "X" solo cuando está seleccionado
     (send boton-seleccionado enable #f)
     
     ;; Verificar si la celda tiene bomba

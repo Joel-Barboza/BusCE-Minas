@@ -3,7 +3,7 @@
 (provide crear-matriz vecinos crear-casilla
          obtener-casilla obtener-mina obtener-bandera obtener-vecinos-casilla
          obtener-indice obtener-coordenadas crear-matriz-con-bombas
-         crear-lista-bombas)  ;; Nueva función exportada
+         crear-lista-bombas bombas-vecinas)  ;; Nueva función exportada
 
 ;; ==================== FUNCIONES DE MATRIZ ====================
 (define (vecinos casilla filas columnas)
@@ -92,11 +92,11 @@
 
 (define (cantidad-bombas filas columnas dificultad)
   (cond ((equal? dificultad "Fácil")
-         (round (/ (* filas columnas) 10)))
+         (round (* filas columnas 0.1)))
         ((equal? dificultad "Medio")
-         (round (/ (* filas columnas) 15)))
+         (round (* filas columnas 0.15)))
         ((equal? dificultad "Difícil")
-         (round (/ (* filas columnas) 20)))))
+         (round (* filas columnas 0.2)))))
 
 ;; ==================== FUNCIONES AUXILIARES ====================
 (define (obtener-casilla matriz i j)
@@ -151,5 +151,39 @@
   (define A (crear-matriz filas columnas))
   (define v (crear-lista-bombas filas columnas dificultad))
   (define Av (matriz-con-bombas A v columnas))
-  (print Av)
   Av)
+
+;;(crear-matriz-con-bombas 8 8 "Fácil")
+
+#|(define (buscar-en-bombas lista-bombas elem)
+  (define (buscar-aux contador)
+    (cond ((null? lista-bombas)
+           (#f))
+          ((equal? (car lista-bombas) elem)
+           (#t))
+          (else
+           (buscar-aux (cdr lista-bombas)))))
+  (buscar-aux lista-bombas))|#
+
+(define (incrementar-valores lista)
+  (define (inc-aux lista resultado)
+    (cond ((null? lista)
+           (reverse resultado))
+          (else
+           (inc-aux (cdr lista) (cons (+ 1 (car lista)) resultado)))))
+  (inc-aux lista '()))
+
+(define (bombas-vecinas idx vecinos lista-bombas)
+  (define lista-vecinos (incrementar-valores vecinos))
+  (define (contador-aux contador lista-vecinos)
+    (cond ((null? lista-vecinos)
+           contador)
+          ((member (car lista-vecinos) lista-bombas)
+           (contador-aux (+ 1 contador) (cdr lista-vecinos)))
+          (else
+           (contador-aux contador (cdr lista-vecinos)))))
+  (contador-aux 0 lista-vecinos))
+
+
+
+
