@@ -123,6 +123,35 @@
 (define cell-size 40) ; tamaño de cada celda en píxeles
 (define estado-celdas (make-hash)) ; almacena el estado de cada celda (oculta, revelada, bandera)
 
+;; ==================== FUNCIONES PARA VERIFICAR VICTORIA ====================
+(define (verificar-victoria)
+  (when (and juego-activo mi-grafo)
+    (define filas (grafo-matriz-filas mi-grafo))
+    (define cols (grafo-matriz-columnas mi-grafo))
+    (define total-celdas (* filas cols))
+    (define celdas-reveladas 0)
+    (define celdas-sin-bomba (- total-celdas (length lista-bombas)))
+    
+    ;; Contar celdas reveladas
+    (for ([i filas])
+      (for ([j cols])
+        (define key (string->symbol (format "~a-~a" i j)))
+        (define estado (hash-ref estado-celdas key 'oculta))
+        (when (eq? estado 'revelada)
+          (set! celdas-reveladas (+ celdas-reveladas 1)))))
+    
+    ;; Verificar si todas las celdas sin bomba están reveladas
+    (when (>= celdas-reveladas celdas-sin-bomba)
+      (ganar-juego))))
+
+(define (ganar-juego)
+  (set! juego-activo #f)
+  (send info-label set-label "¡FELICIDADES! Has ganado el juego.")
+  (message-box "¡Victoria!" 
+               "¡FELICIDADES! Has revelado todas las celdas seguras.\n¡Has ganado el juego!" 
+               frame 
+               '(ok)))
+
 ;; ==================== CANVAS PERSONALIZADO ====================
 (define game-canvas%
   (class canvas%
@@ -212,8 +241,7 @@
 (define (crear-interfaz-matriz filas cols)
   ;; Destruir frame anterior si existe
   (when frame
-    (send frame show #f)
-    #|(send frame dispose)|#)
+    (send frame show #f))
   
   (set! frame (new frame%
                    [label (format "Buscaminas ~ax~a" filas cols)]
@@ -258,41 +286,16 @@
                              [alignment '(center center)]
                              [spacing 10]))
   
-  #|(new button% [parent panel-control]
-       [label "Reiniciar Juego"]
-       [callback (λ (b e) (iniciar-gui-game filas cols (obtener-dificultad)))])|#
-(new button% [parent panel-control]
-     [label "Volver al inicio"]
-     [callback
-      (λ (b e)
-        (send frame show #f)        ; ocultar la ventana del juego
-        (send start-frame show #t))]) ; mostrar la pantalla de inicio
-
-
-
+  (new button% [parent panel-control]
+       [label "Volver al inicio"]
+       [callback
+        (λ (b e)
+          (send frame show #f)        ; ocultar la ventana del juego
+          (send start-frame show #t))]) ; mostrar la pantalla de inicio
 
   (new button% [parent panel-control]
        [label "Mostrar Bombas"]
-       [callback (λ (b e) (mostrar-todas-bombas))])
-  
-  ;; Panel de búsqueda
-  (define panel-busqueda (new horizontal-panel%
-                              [parent panel-principal]
-                              [alignment '(center center)]
-                              [spacing 5]))
-  
-  (define campo-busqueda (new text-field%
-                              [parent panel-busqueda]
-                              [label (format "Buscar índice (1-~a):" (* filas cols))]
-                              [init-value ""]
-                              [min-width 150]))
-  
-  (new button% [parent panel-busqueda]
-       [label "Buscar"]
-       [callback (λ (b e)
-                   (define texto (send campo-busqueda get-value))
-                   (when (non-empty-string? texto)
-                     (buscar-por-indice (string->number texto) filas cols)))]))
+       [callback (λ (b e) (mostrar-todas-bombas))]))
 
 (define (manejar-click-celda i j)
   (when juego-activo
@@ -308,7 +311,8 @@
           (begin
             (hash-set! estado-celdas key 'revelada)
             (mostrar-info-celda i j)
-            (send game-canvas refresh))))))
+            (send game-canvas refresh)
+            (verificar-victoria)))))) ; Verificar victoria después de revelar celda
 
 (define (manejar-click-derecho i j)
   (when juego-activo
@@ -385,14 +389,6 @@
        "Vecinos: " (string-join (map (λ (v) (number->string (+ v 1))) (sort vecinos <)) ", ")))
     
     (send info-label set-label info-texto)))
-
-(define (buscar-por-indice idx filas cols)
-  (when (and mi-grafo (number? idx) (>= idx 1) (<= idx (* filas cols)))
-    (define i (quotient (- idx 1) cols))
-    (define j (remainder (- idx 1) cols))
-    (mostrar-info-celda i j)
-    #t)
-  #f)
 
 (define (non-empty-string? str)
   (not (string=? (string-trim str) "")))
