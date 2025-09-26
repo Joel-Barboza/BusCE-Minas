@@ -152,6 +152,23 @@
                frame 
                '(ok)))
 
+;; ==================== REVELADO EN CADENA (FLOOD FILL) ====================
+(define (revelar-celdas-cero i j)
+  (define idx (obtener-indice mi-grafo i j))
+  (define vecinos-lista (obtener-vecinos mi-grafo idx))
+  (define num-bombas (bombas-vecinas idx vecinos-lista lista-bombas))
+  
+  (when (and juego-activo (eq? (hash-ref estado-celdas (string->symbol (format "~a-~a" i j)) 'oculta) 'oculta))
+    (hash-set! estado-celdas (string->symbol (format "~a-~a" i j)) 'revelada)
+    
+    ;; Si la celda tiene 0 bombas vecinas, revelar recursivamente sus vecinos
+    (when (= num-bombas 0)
+      (for ([vecino-idx vecinos-lista])
+        (define cols (grafo-matriz-columnas mi-grafo))
+        (define i-vecino (quotient vecino-idx cols))
+        (define j-vecino (remainder vecino-idx cols))
+        (revelar-celdas-cero i-vecino j-vecino)))))
+
 ;; ==================== CANVAS PERSONALIZADO ====================
 (define game-canvas%
   (class canvas%
@@ -309,8 +326,8 @@
       (if tiene-bomba
           (perder-juego i j)
           (begin
-            (hash-set! estado-celdas key 'revelada)
-            (mostrar-info-celda i j)
+            ;; Usar la función de revelado en cadena
+            (revelar-celdas-cero i j)
             (send game-canvas refresh)
             (verificar-victoria)))))) ; Verificar victoria después de revelar celda
 
